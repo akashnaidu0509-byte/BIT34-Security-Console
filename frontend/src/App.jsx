@@ -12,6 +12,8 @@ function App() {
 const [timeline, setTimeline] = useState([]);
 const [timelineIp, setTimelineIp] = useState("");
 
+const [graph, setGraph] = useState({ nodes: [], edges: [] });
+
   const loadData = async () => {
     try {
       const dashboardResponse = await fetch(
@@ -31,6 +33,12 @@ const [timelineIp, setTimelineIp] = useState("");
       );
       const eventsData = await eventsResponse.json();
       setEvents(eventsData);
+
+      const graphResponse = await fetch(
+  "http://localhost:8080/api/graph"
+);
+const graphData = await graphResponse.json();
+setGraph(graphData);
 
 if (eventsData.length > 0) {
   const ip = eventsData[0].sourceIp;
@@ -136,6 +144,30 @@ if (eventsData.length > 0) {
           <strong>{event.eventType}</strong>
           <span>{event.username}</span>
           <span>{new Date(event.timestamp).toLocaleString()}</span>
+        </div>
+      ))}
+    </div>
+  )}
+</section>
+
+<section className="panel">
+  <h2>Relationship Graph</h2>
+
+  {graph.nodes.length === 0 ? (
+    <p>No graph relationships available.</p>
+  ) : (
+    <div>
+      <p>
+        Nodes: <strong>{graph.nodes.length}</strong> |
+        Relationships: <strong>{graph.edges.length}</strong>
+      </p>
+
+      {graph.edges.map((edge, index) => (
+        <div className="event" key={index}>
+          <strong>{edge.source}</strong>
+          <span> → </span>
+          <strong>{edge.target}</strong>
+          <span> ({edge.relationship})</span>
         </div>
       ))}
     </div>
